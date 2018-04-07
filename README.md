@@ -1,6 +1,8 @@
 # NettyBug
 Potential race condition in Netty library when proxying to internal channels. Version 4.1.23
 
+filed bug: https://github.com/netty/netty/issues/7855 
+
 ### Overview
 I am new to Netty.
 
