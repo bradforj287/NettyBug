@@ -1,12 +1,12 @@
 package com.bradforj287.nettybug.handlers;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.local.LocalAddress;
 import io.netty.channel.local.LocalChannel;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpObject;
-import io.netty.handler.codec.http.HttpRequestEncoder;
 
 public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject> {
     private Channel outboundChannel;
@@ -37,7 +37,7 @@ public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject
     }
 
     private ChannelFuture buildOutboundConnection(ChannelHandlerContext writeChanel) {
-        SimpleChannelInboundHandler<ByteBuf> backend = new SimpleChannelInboundHandler<ByteBuf>() {
+        SimpleChannelInboundHandler<HttpObject> backend = new SimpleChannelInboundHandler<HttpObject>() {
             @Override
             public void channelActive(ChannelHandlerContext ctx) throws Exception {
                 ctx.read();
@@ -49,8 +49,10 @@ public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject
             }
 
             @Override
-            protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-                msg.retain();
+            protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {
+                if (msg instanceof HttpContent) {
+                    ((HttpContent) msg).retain();
+                }
                 NettyUtils.flushToChannel(writeChanel.channel(), ctx.channel(), msg);
             }
         };
@@ -64,7 +66,7 @@ public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject
                     @Override
                     protected void initChannel(LocalChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast(new HttpRequestEncoder());
+                        p.addLast(new HttpClientCodec());
                         p.addLast(backend);
                     }
                 }).option(ChannelOption.AUTO_READ, false);

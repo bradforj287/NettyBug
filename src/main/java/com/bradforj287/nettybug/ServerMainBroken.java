@@ -10,7 +10,7 @@ import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class ServerMainBroken {
                     @Override
                     protected void initChannel(LocalChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast(new HttpRequestDecoder());
+                        p.addLast(new HttpServerCodec());
                         p.addLast(new CustomHttpProxyHandler("localhost", 5000));
                     }
                 })
@@ -56,7 +56,7 @@ public class ServerMainBroken {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
-                        p.addLast(new HttpRequestDecoder());
+                        p.addLast(new HttpServerCodec());
                         p.addLast(new InternalProxyHandler());
                     }
                 }).childOption(ChannelOption.AUTO_READ, false);
