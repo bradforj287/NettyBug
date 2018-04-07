@@ -26,6 +26,7 @@ public class ServerMainBroken {
 
     public static void main(String[] args) throws Exception {
         logger.info("starting broken server");
+        logger.info(String.format("make http request to: http://localhost:%s", PORT));
 
         // internal server start
         final LocalAddress addr = new LocalAddress("internalServer");

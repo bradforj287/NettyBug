@@ -1,8 +1,12 @@
 package com.bradforj287.nettybug;
 
 import com.bradforj287.nettybug.handlers.CustomHttpProxyHandler;
+import com.bradforj287.nettybug.handlers.InternalProxyHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
+import io.netty.channel.local.LocalAddress;
+import io.netty.channel.local.LocalChannel;
+import io.netty.channel.local.LocalServerChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -12,16 +16,36 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServerMainWorking {
-    private static Logger logger = LoggerFactory.getLogger(ServerMainWorking.class);
+public class ServerMainWorking2 {
+    private static Logger logger = LoggerFactory.getLogger(ServerMainBroken.class);
 
     private final static int PORT = 9090;
 
     private static EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
 
     public static void main(String[] args) throws Exception {
-        logger.info("starting working server 1");
+        logger.info("starting working server 2");
         logger.info(String.format("make http request to: http://localhost:%s", PORT));
+
+        // internal server start
+        final LocalAddress addr = new LocalAddress("internalServer");
+
+        ServerBootstrap sb = new ServerBootstrap();
+        sb.group(eventLoopGroup)
+                .channel(LocalServerChannel.class)
+                .handler(new LoggingHandler(LogLevel.INFO))
+                .childHandler(new ChannelInitializer<LocalChannel>() {
+                    @Override
+                    protected void initChannel(LocalChannel ch) throws Exception {
+                        ChannelPipeline p = ch.pipeline();
+                        p.addLast(new HttpServerCodec());
+                        p.addLast(new CustomHttpProxyHandler("localhost", 5000, true));
+                    }
+                })
+                .childOption(ChannelOption.AUTO_READ, false);
+
+        // Start the server.
+        sb.bind(addr).sync();
 
         // external server start
         ServerBootstrap b = new ServerBootstrap();
@@ -33,7 +57,7 @@ public class ServerMainWorking {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new HttpServerCodec());
-                        p.addLast(new CustomHttpProxyHandler("localhost", 5000, false));
+                        p.addLast(new InternalProxyHandler(true));
                     }
                 }).childOption(ChannelOption.AUTO_READ, false);
 

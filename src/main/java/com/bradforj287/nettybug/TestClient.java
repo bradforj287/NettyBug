@@ -1,5 +1,8 @@
 package com.bradforj287.nettybug;
+
 import com.google.common.base.Stopwatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -8,8 +11,11 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 public class TestClient {
-    private final static String URL = "dd";
+    private static Logger logger = LoggerFactory.getLogger(ServerMainBroken.class);
+
+    private final static String URL = "<ENTER URL HERE!!!>";
     private final static int iterations = 100000;
+    private final static boolean validateAllSameResponse = false;
 
     private static String getHTML(String urlToRead) throws Exception {
         StringBuilder result = new StringBuilder();
@@ -26,16 +32,17 @@ public class TestClient {
     }
 
     public static void main(String args[]) throws Exception {
-
+        logger.info(String.format("Hitting URL: %s", URL));
+        logger.info(String.format("Executing %s iterations", iterations));
         Stopwatch sw = Stopwatch.createStarted();
 
         final String first = getHTML(URL);
-        System.out.println("Finished iteration 0");
+        logger.info("Finished iteration 0");
         for (int i = 1; i < iterations; i++) {
             final String str = getHTML(URL);
-            System.out.println("finished iteration " + i);
-            if (!str.equals(first)) {
-                System.out.println("Values do not match, exiting");
+            logger.info("finished iteration " + i);
+            if (validateAllSameResponse && !str.equals(first)) {
+                logger.info("Values do not match, exiting");
                 break;
             }
         }
@@ -43,7 +50,6 @@ public class TestClient {
         double seconds = sw.elapsed(TimeUnit.SECONDS);
         double ips = iterations / seconds;
 
-        System.out.println(String.format("Requests per second = %s", ips));
+        logger.info(String.format("Requests per second = %s", ips));
     }
-
 }
