@@ -15,11 +15,13 @@ public class CustomHttpProxyHandler extends SimpleChannelInboundHandler<HttpObje
 
     private final String host;
     private final int port;
+    private final boolean autoRead;
     private final SslContext sslContext;
 
     private Channel outboundChannel;
 
-    public CustomHttpProxyHandler(String host, int port) {
+    public CustomHttpProxyHandler(String host, int port, boolean autoRead) {
+        this.autoRead = autoRead;
         this.host = host;
         this.port = port;
         try {
@@ -37,6 +39,7 @@ public class CustomHttpProxyHandler extends SimpleChannelInboundHandler<HttpObje
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     outboundChannel = future.channel();
+                    ctx.channel().config().setOption(ChannelOption.AUTO_READ, autoRead);
                     ctx.read();
                 } else {
                     ctx.close();
@@ -89,7 +92,7 @@ public class CustomHttpProxyHandler extends SimpleChannelInboundHandler<HttpObje
                         p.addLast(new HttpClientCodec());
                         p.addLast(backend);
                     }
-                }).option(ChannelOption.AUTO_READ, false);
+                }).option(ChannelOption.AUTO_READ, autoRead);
 
         return b.connect(host, port);
     }

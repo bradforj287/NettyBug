@@ -39,7 +39,7 @@ public class ServerMainBroken {
                     protected void initChannel(LocalChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new HttpServerCodec());
-                        p.addLast(new CustomHttpProxyHandler("localhost", 5000));
+                        p.addLast(new CustomHttpProxyHandler("localhost", 5000, false));
                     }
                 })
                 .childOption(ChannelOption.AUTO_READ, false);
@@ -57,7 +57,7 @@ public class ServerMainBroken {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new HttpServerCodec());
-                        p.addLast(new InternalProxyHandler());
+                        p.addLast(new InternalProxyHandler(false));
                     }
                 }).childOption(ChannelOption.AUTO_READ, false);
 

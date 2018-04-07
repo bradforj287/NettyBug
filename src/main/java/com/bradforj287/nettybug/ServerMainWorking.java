@@ -22,7 +22,6 @@ public class ServerMainWorking {
     public static void main(String[] args) throws Exception {
         logger.info("starting working server 1");
 
-
         // external server start
         ServerBootstrap b = new ServerBootstrap();
         b.group(eventLoopGroup)
@@ -33,7 +32,7 @@ public class ServerMainWorking {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new HttpServerCodec());
-                        p.addLast(new CustomHttpProxyHandler("localhost", 5000));
+                        p.addLast(new CustomHttpProxyHandler("localhost", 5000, false));
                     }
                 }).childOption(ChannelOption.AUTO_READ, false);
 

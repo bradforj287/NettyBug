@@ -10,6 +10,11 @@ import io.netty.handler.codec.http.HttpObject;
 
 public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject> {
     private Channel outboundChannel;
+    private final boolean autoRead;
+
+    public InternalProxyHandler(boolean autoRead) {
+        this.autoRead = autoRead;
+    }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -18,6 +23,7 @@ public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     outboundChannel = future.channel();
+                    ctx.channel().config().setOption(ChannelOption.AUTO_READ, autoRead);
                     ctx.read();
                 } else {
                     ctx.close();
@@ -69,7 +75,7 @@ public class InternalProxyHandler extends SimpleChannelInboundHandler<HttpObject
                         p.addLast(new HttpClientCodec());
                         p.addLast(backend);
                     }
-                }).option(ChannelOption.AUTO_READ, false);
+                }).option(ChannelOption.AUTO_READ, autoRead);
 
         return b.connect(addr);
     }
