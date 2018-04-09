@@ -56,7 +56,7 @@ public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObj
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         boolean isWritable = ctx.channel().isWritable();
-        logger.info("frontend - writability changed: " + isWritable);
+        logger.debug("frontend - writability changed: " + isWritable);
         outboundChannel.config().setOption(ChannelOption.AUTO_READ, isWritable);
     }
 
@@ -80,7 +80,7 @@ public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObj
             @Override
             public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
                 boolean isWritable = ctx.channel().isWritable();
-                logger.info("backend - writability changed: " + isWritable);
+                logger.debug("backend - writability changed: " + isWritable);
                 writeChanel.channel().config().setOption(ChannelOption.AUTO_READ, isWritable);
             }
 
