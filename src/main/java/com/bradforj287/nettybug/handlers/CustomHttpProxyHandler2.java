@@ -15,11 +15,15 @@ public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObj
 
     private final String host;
     private final int port;
+    private final int lowWaterMark;
+    private final int highWaterMark;
     private final SslContext sslContext;
 
     private Channel outboundChannel;
 
-    public CustomHttpProxyHandler2(String host, int port) {
+    public CustomHttpProxyHandler2(String host, int port, int lowWaterMark, int highWaterMark) {
+        this.lowWaterMark = lowWaterMark;
+        this.highWaterMark = highWaterMark;
         this.host = host;
         this.port = port;
         try {
@@ -102,7 +106,8 @@ public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObj
                         p.addLast(new HttpClientCodec());
                         p.addLast(backend);
                     }
-                }).option(ChannelOption.AUTO_READ, true);
+                }).option(ChannelOption.AUTO_READ, true)
+                .option(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(lowWaterMark, highWaterMark));
 
         return b.connect(host, port);
     }
