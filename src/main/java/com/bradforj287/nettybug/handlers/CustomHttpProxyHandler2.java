@@ -10,8 +10,11 @@ import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObject> {
+    private static Logger logger = LoggerFactory.getLogger(CustomHttpProxyHandler2.class);
 
     private final String host;
     private final int port;
@@ -53,6 +56,7 @@ public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObj
     @Override
     public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
         boolean isWritable = ctx.channel().isWritable();
+        logger.info("frontend - writability changed: " + isWritable);
         outboundChannel.config().setOption(ChannelOption.AUTO_READ, isWritable);
     }
 
@@ -76,6 +80,7 @@ public class CustomHttpProxyHandler2 extends SimpleChannelInboundHandler<HttpObj
             @Override
             public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
                 boolean isWritable = ctx.channel().isWritable();
+                logger.info("backend - writability changed: " + isWritable);
                 writeChanel.channel().config().setOption(ChannelOption.AUTO_READ, isWritable);
             }
 
